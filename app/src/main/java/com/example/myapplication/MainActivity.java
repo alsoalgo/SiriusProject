@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         ArrayList<Model> list = new ArrayList<Model>();
 
-        for(int i = 0; i < android.R.drawable.class.getFields().length; i++){
+        for(int i = 0; i < 8; i++){
             Model imageModel = new Model();
             imageModel.setName(myImageNameList[i]);
             imageModel.setDescription(myIdeaDescriptionList[i]);
