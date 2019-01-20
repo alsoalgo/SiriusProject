@@ -17,34 +17,34 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "MainActivity";
 
     public interface ClickListener {
         void onClick(View view, int position);
         void onLongClick(View view, int position);
     }
 
-    private RecyclerView recyclerView;
-    private ArrayList<Model> imageModelArrayList;
-    private Adapter adapter;
+    public void makeToast() {
+        Toast.makeText(this, "Created", Toast.LENGTH_LONG).show();
+    }
+    public void makeToastDb() {
+        Toast.makeText(this, "Init", Toast.LENGTH_LONG).show();
+    }
 
-    private int[] myImageList = new int[]{R.drawable.benz, R.drawable.bike,
-            R.drawable.car, R.drawable.carrera,
-            R.drawable.ferrari, R.drawable.harly,
-            R.drawable.lamborghini,R.drawable.silver};
-    private String[] myImageNameList = new String[]{"Benz", "Bike",
-            "Car","Carrera"
-            ,"Ferrari","Harly",
-            "Lamborghini","Silver"};
-    private String[] myIdeaDescriptionList = new String[]{"Hey!", "I",
-            "know","You"
-            ,"Are","Very",
-            "Pretty","Just Smile)"};
+    private RecyclerView recyclerView;
+    private ArrayList<Model> IdeasList;
+    private Adapter adapter;
+    GetAllIdeasTask gt;
+    PostIdeasTask mt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,29 +58,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        /*
+        gt = new GetAllIdeasTask(this);
+        gt.execute();
+        Log.d(TAG, "Here...\n");
+        List<Idea> ideas = gt.dbhelper.getAll();
+        Log.d(TAG, "Here...\n");
+        for (Idea a : ideas) {
+            IdeasList.add(new Model(a));
+        }*/
 
-        // Next block for RecyclerView
+
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        imageModelArrayList = populateList();
-        Log.d("onCreateMainActivity()", imageModelArrayList.size() + "");
-        adapter = new Adapter(this, imageModelArrayList);
+
+        IdeasList = new ArrayList<Model>();
+
+        gt = new GetAllIdeasTask(this);
+        Log.e(TAG, "Here...\n");
+        gt.execute();
+        Log.e(TAG,"Trouble");
+        List<Idea> ideas = gt.dbhelper.getAll();
+        Log.e(TAG, "" + ideas.size()); //Здесь ничего не логируется при запуске с эмулятора
+        for (Idea a : ideas) {
+            IdeasList.add(new Model(a));
+        }
+
+        adapter = new Adapter(this, IdeasList);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
 
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
-
             @Override
             public void onClick(View view, int position) {
-                Toast.makeText(MainActivity.this, imageModelArrayList.get(position).getName(), Toast.LENGTH_SHORT).show();
+                Model idea = IdeasList.get(position);
                 Intent intent = new Intent(MainActivity.this, IdeaProfileActivity.class);
+                intent.putExtra("id", idea.getId());
+                intent.putExtra("title", idea.getTitle());
+                intent.putExtra("image", idea.getImage());
+                intent.putExtra("author", idea.getAuthor());
+                intent.putExtra("long", idea.getLongdesc());
                 startActivity(intent);
             }
             @Override
-            public void onLongClick(View view, int position) {
-
-            }
+            public void onLongClick(View view, int position) {}
         }));
-        // The end of the block
     }
 
     @Override
@@ -100,15 +121,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_profile) {
-
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_ideas_feed) {
-
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_add_idea) {
-
+            Intent intent = new Intent(MainActivity.this, AddIdeaActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_my_project) {
-
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_chosen) {
-
+            Intent intent = new Intent(MainActivity.this, IdeaProfileActivity.class);
+            startActivity(intent);
         }
 
 
@@ -116,25 +142,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
-    // Next for RecyclerView
-    private ArrayList<Model> populateList(){
-
-        ArrayList<Model> list = new ArrayList<Model>();
-
-        for(int i = 0; i < 8; i++){
-            Model imageModel = new Model();
-            imageModel.setName(myImageNameList[i]);
-            imageModel.setDescription(myIdeaDescriptionList[i]);
-            imageModel.setImage_drawable(myImageList[i]);
-            list.add(imageModel);
-        }
-
-        return list;
-    }
-
-
 
     static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
 
@@ -171,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
         }
 
         @Override

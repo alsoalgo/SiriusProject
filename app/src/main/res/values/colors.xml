@@ -5,5 +5,5 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorCircle">#2e3a46</color>
     <color name="colorStar">#92a2bc</color>
-    <color name="colorWhite">#00ffffff</color>
+    <color name="colorWhite">#ffffff</color>
 </resources>
