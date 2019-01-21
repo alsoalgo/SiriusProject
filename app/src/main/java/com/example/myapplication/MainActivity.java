@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.ColorSpace;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,27 +16,33 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataBaseReceiver {
     private static final String TAG = "MainActivity FIND";
+    IdeasDataBaseHelper dbhelper;
+    ArrayList<Model> listIdeas;
 
     public interface ClickListener {
         void onClick(View view, int position);
         void onLongClick(View view, int position);
     }
 
+    @Override
+    public void dataReceived(List<Idea> list) {
 
+    }
     private RecyclerView recyclerView;
-    private ArrayList<Model> IdeasList;
     private Adapter adapter;
     GetAllIdeasTask gt;
-
+    DataBaseReceiver r;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,31 +58,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
+        dbhelper = new IdeasDataBaseHelper(this);
+        loadData();
+    }
 
-        IdeasList = new ArrayList<Model>();
-
-        gt = new GetAllIdeasTask(this);
-        Log.e(TAG, "Created");
-        gt.execute();
-        Log.e(TAG,"Executed");
-        List<Idea> ideas = gt.dbhelper.getAll();
-        Log.e(TAG,"" + ideas.size());
-        for (Idea a : ideas) {
-            a.print();
-            IdeasList.add(new Model(a));
-            Log.e(TAG,"Added");
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
-        Log.e(TAG,"Took");
-        adapter = new Adapter(this, IdeasList);
-        Log.e(TAG,"Adapter");
+    }
+
+    void loadData() {
+        try {
+            NetworkService.getInstance()
+                    .getIdeasAPI()
+                    .getAllIdeas().enqueue(new Callback<List<Idea>>() {
+                @Override
+                public void onResponse(Call<List<Idea>> call, Response<List<Idea>> response) {
+                    Log.e(TAG,"onResponse()");
+                    List<Idea> ideas = response.body();
+                    listIdeas = new ArrayList<>();
+                    Log.e(TAG,"" + ideas.size());
+                    for (Idea idea : ideas) {
+                        listIdeas.add(new Model(idea));
+                        dbhelper.insertIdea(idea);
+                    }
+                    initAll();
+                }
+
+                @Override
+                public void onFailure(Call<List<Idea>> call, Throwable t) {
+                    Log.e(TAG,"onFailure() inserted");
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void initAll() {
+        adapter = new Adapter(getApplicationContext(), listIdeas);
         recyclerView.setAdapter(adapter);
-        Log.e(TAG,"Setted");
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
-        Log.e(TAG,"SetLa");
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Model idea = IdeasList.get(position);
+                Model idea = listIdeas.get(position);
                 //Проверяем getAuthor() == MyId
                 Intent intent = new Intent(MainActivity.this, IdeaProfileActivity.class);
                 intent.putExtra("id", idea.getId());
@@ -91,16 +121,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onLongClick(View view, int position) {}
         }));
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
