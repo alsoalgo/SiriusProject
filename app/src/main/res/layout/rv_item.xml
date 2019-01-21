@@ -79,14 +79,14 @@
                         <ImageView
                             android:id="@+id/iv_like"
                             android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_height="17dp"
                             android:layout_weight="1"
                             tools:srcCompat="@drawable/like" />
 
                         <TextView
                             android:id="@+id/textView"
                             android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_height="13dp"
                             android:layout_weight="1"
                             android:text="TextView" />
 

@@ -52,14 +52,10 @@ public class AddIdeaActivity extends AppCompatActivity {
                 String shortDescription = ShortDescription.getText().toString();
                 String longDescription = LongDescription.getText().toString();
                 try {
-                    Toast.makeText(getApplicationContext(), "1", Toast.LENGTH_LONG).show();
                     PostIdeasTask mt = new PostIdeasTask(AddIdeaActivity.this, new Idea(ideaTitle, shortDescription, longDescription, "image..."));
-                    Toast.makeText(getApplicationContext(), "2", Toast.LENGTH_LONG).show();
                     mt.execute();
-                    Toast.makeText(getApplicationContext(), "3", Toast.LENGTH_LONG).show();
                     AddIdeaActivity.this.finish();
                 } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "4", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
             }

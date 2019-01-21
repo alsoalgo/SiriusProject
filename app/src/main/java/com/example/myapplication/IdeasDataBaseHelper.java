@@ -31,6 +31,7 @@ public class IdeasDataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        db.execSQL("drop table if exists Ideas;");
         db.execSQL("create table if not exists Ideas (ID INTEGER PRIMARY KEY AUTOINCREMENT, title text, shortdesc text, longdesc text, author integer, image text);");
     }
 
@@ -75,10 +76,10 @@ public class IdeasDataBaseHelper extends SQLiteOpenHelper {
         Log.e(TAG, "Opened");
         ArrayList<Idea> ideas = new ArrayList<Idea>();
         Cursor cursor = db.rawQuery("select * from Ideas", null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
+        cursor.getCount();
+        for (int i = 1; i <= cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
             ideas.add(parse(cursor));
-            cursor.moveToNext();
         }
         return ideas;
     }

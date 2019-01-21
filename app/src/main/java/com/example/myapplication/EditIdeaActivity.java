@@ -8,14 +8,17 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 public class EditIdeaActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE = 100;
+    EditText title, shortDescription, longDescription;
     ImageView imageView;
-    Button button;
+    Button image_button, ready, cancel;
     Uri imageUri;
+    int ideaId;
 
     @SuppressLint({"WrongViewCast", "CutPasteId"})
     @Override
@@ -23,17 +26,46 @@ public class EditIdeaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_idea);
 
-        imageView = (ImageView)findViewById(R.id.edit_iv3);
-        button = (Button) findViewById(R.id.edit_button3);
+        Bundle arguments = getIntent().getExtras();
 
-        button.setOnClickListener(new View.OnClickListener() {
+        title = findViewById(R.id.editText3);
+        title.setText(arguments.get("title").toString());
+
+        shortDescription = findViewById(R.id.editText8);
+        shortDescription.setText(arguments.get("short").toString());
+
+        longDescription = findViewById(R.id.editText2);
+        longDescription.setText(arguments.get("long").toString());
+
+        ideaId = (Integer) arguments.get("id");
+
+        image_button = findViewById(R.id.edit_button3);
+        image_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openGallery();
             }
         });
-        //Обработать новую кнопку
+        ready = findViewById(R.id.ready);
+        ready.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String title = ((EditText)findViewById(R.id.editText3)).getText().toString();
+                String shortDesc = ((EditText)findViewById(R.id.editText8)).getText().toString();
+                String longDesc = ((EditText)findViewById(R.id.editText2)).getText().toString();
+                PutIdeasTask pt = new PutIdeasTask(EditIdeaActivity.this, new Idea(title, shortDesc, longDesc, "image"), ideaId);
+                pt.execute();
+                EditIdeaActivity.this.finish();
+            }
+        });
 
+        cancel = findViewById(R.id.cancel);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditIdeaActivity.this.finish();
+            }
+        });
     }
     private void openGallery(){
         Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);

@@ -25,25 +25,18 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "MainActivity FIND";
 
     public interface ClickListener {
         void onClick(View view, int position);
         void onLongClick(View view, int position);
     }
 
-    public void makeToast() {
-        Toast.makeText(this, "Created", Toast.LENGTH_LONG).show();
-    }
-    public void makeToastDb() {
-        Toast.makeText(this, "Init", Toast.LENGTH_LONG).show();
-    }
 
     private RecyclerView recyclerView;
     private ArrayList<Model> IdeasList;
     private Adapter adapter;
     GetAllIdeasTask gt;
-    PostIdeasTask mt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,45 +51,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        /*
-        gt = new GetAllIdeasTask(this);
-        gt.execute();
-        Log.d(TAG, "Here...\n");
-        List<Idea> ideas = gt.dbhelper.getAll();
-        Log.d(TAG, "Here...\n");
-        for (Idea a : ideas) {
-            IdeasList.add(new Model(a));
-        }*/
-
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
 
         IdeasList = new ArrayList<Model>();
 
         gt = new GetAllIdeasTask(this);
-        Log.e(TAG, "Here...\n");
+        Log.e(TAG, "Created");
         gt.execute();
-        Log.e(TAG,"Trouble");
+        Log.e(TAG,"Executed");
         List<Idea> ideas = gt.dbhelper.getAll();
-        Log.e(TAG, "" + ideas.size()); //Здесь ничего не логируется при запуске с эмулятора
+        Log.e(TAG,"" + ideas.size());
         for (Idea a : ideas) {
+            a.print();
             IdeasList.add(new Model(a));
+            Log.e(TAG,"Added");
         }
-
+        Log.e(TAG,"Took");
         adapter = new Adapter(this, IdeasList);
+        Log.e(TAG,"Adapter");
         recyclerView.setAdapter(adapter);
+        Log.e(TAG,"Setted");
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));
-
+        Log.e(TAG,"SetLa");
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 Model idea = IdeasList.get(position);
+                //Проверяем getAuthor() == MyId
                 Intent intent = new Intent(MainActivity.this, IdeaProfileActivity.class);
                 intent.putExtra("id", idea.getId());
                 intent.putExtra("title", idea.getTitle());
                 intent.putExtra("image", idea.getImage());
                 intent.putExtra("author", idea.getAuthor());
                 intent.putExtra("long", idea.getLongdesc());
+                intent.putExtra("short", idea.getShortdesc());
                 startActivity(intent);
             }
             @Override
@@ -121,19 +110,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.nav_profile) {
-            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            Intent intent = new Intent(MainActivity.this, MainActivity.class); //Profile
             startActivity(intent);
         } else if (id == R.id.nav_ideas_feed) {
-            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            Intent intent = new Intent(MainActivity.this, MainActivity.class); //Feed
             startActivity(intent);
         } else if (id == R.id.nav_add_idea) {
-            Intent intent = new Intent(MainActivity.this, AddIdeaActivity.class);
+            Intent intent = new Intent(MainActivity.this, AddIdeaActivity.class);//Add
             startActivity(intent);
         } else if (id == R.id.nav_my_project) {
-            Intent intent = new Intent(MainActivity.this, MainActivity.class);
+            Intent intent = new Intent(MainActivity.this, MainActivity.class);//MyFeed
             startActivity(intent);
         } else if (id == R.id.nav_chosen) {
-            Intent intent = new Intent(MainActivity.this, IdeaProfileActivity.class);
+            Intent intent = new Intent(MainActivity.this, IdeaProfileActivity.class);//Fav
             startActivity(intent);
         }
 

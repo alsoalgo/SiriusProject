@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -14,14 +15,16 @@ class PostIdeasTask extends AsyncTask<Void, Void, Void> {
     Idea idea;
     ToPost post;
     IdeasDataBaseHelper db;
+    String TAG = "PostIdeasTask";
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
     }
 
-    public PostIdeasTask(Context context, Idea idea) {
+    public PostIdeasTask(
+            Context context,
+            Idea idea) {
         this.context = context;
         this.idea = idea;
         this.db = new IdeasDataBaseHelper(context);
@@ -31,13 +34,11 @@ class PostIdeasTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         try {
-            Toast.makeText(this.context, "Try post idea", Toast.LENGTH_LONG).show();
-            NetworkService.getInstance()
-                    .getIdeasAPI()
-                    .postIdea(post)
-                    .enqueue(new Callback<Idea>() {
+            Log.e(TAG, "Try1");
+            NetworkService.getInstance().getIdeasAPI().postIdea(post).enqueue(new Callback<Idea>() {
                                 @Override
                                 public void onResponse(Call<Idea> call, Response<Idea> response) {
+                                    Log.e(TAG, "Inside");
                                     if (response.isSuccessful()) {
                                         db.insertIdea(idea);
                                     }
@@ -46,7 +47,7 @@ class PostIdeasTask extends AsyncTask<Void, Void, Void> {
                                 public void onFailure(Call<Idea> call, Throwable t) {}
             });
         } catch (Exception e) {
-            Toast.makeText(this.context, "Couldn't post idea", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Err");
             e.printStackTrace();
         }
         return null;
