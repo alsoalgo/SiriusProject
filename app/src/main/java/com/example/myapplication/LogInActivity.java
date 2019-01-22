@@ -19,6 +19,7 @@ public class LogInActivity
         extends AppCompatActivity {
     private String login, pass;
     private Button reg, signIn;
+    private String TAG = "LogInActivity";
     DataBaseHelper dbhelper;
     @SuppressLint({"WrongViewCast", "CutPasteId"})
     @Override
@@ -52,7 +53,11 @@ public class LogInActivity
                 public void onResponse(Call<User> call, Response<User> response) {
                     if (response.isSuccessful()) {
                         String token = response.body().getToken();
-                        Toast.makeText(getApplicationContext(), token, Toast.LENGTH_LONG);
+                        Log.e(TAG, token);
+                        Log.e(TAG, token);
+                        Log.e(TAG, token);
+                        Log.e(TAG, token);
+                        Log.e(TAG, token);
                         Intent intent = new Intent(LogInActivity.this, MainActivity.class);
                         intent.putExtra("token", token);
                         dbhelper = new DataBaseHelper(LogInActivity.this);
