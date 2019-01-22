@@ -1,39 +1,77 @@
 package com.example.myapplication;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class LogInActivity
         extends AppCompatActivity {
-
+    private String login, pass;
+    private Button reg, signIn;
+    DataBaseHelper dbhelper;
     @SuppressLint({"WrongViewCast", "CutPasteId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
-        String logIn = ((MaterialEditText)findViewById(R.id.login)).getText().toString().trim();
-        String pass = ((MaterialEditText)findViewById(R.id.login)).getText().toString().trim();
-        Button reg = findViewById(R.id.registration);
-        Button signIn = findViewById(R.id.Button);
-
-        reg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick (View v){
-                //Переход на регистрацию
-            }
-        });
-
+        reg = findViewById(R.id.registration);
+        signIn = findViewById(R.id.Button);
         signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View v){
-                //Вход в приложение
+                login = ((MaterialEditText)findViewById(R.id.login)).getText().toString().trim();
+                pass = ((MaterialEditText)findViewById(R.id.password)).getText().toString().trim();
+                logIn();
             }
         });
+        reg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View v){
+                Intent intent = new Intent(LogInActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    void logIn() {
+        try {
+            NetworkService.getInstance()
+                    .getUserAPI().authorize(new ToAuthorize(login, pass)).enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    if (response.isSuccessful()) {
+                        String token = response.body().getToken();
+                        Toast.makeText(getApplicationContext(), token, Toast.LENGTH_LONG);
+                        Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+                        intent.putExtra("token", token);
+                        dbhelper = new DataBaseHelper(LogInActivity.this);
+                        dbhelper.insertToken(token);
+                        startActivity(intent);
+                        LogInActivity.this.finish();
+                    } else {
+                        Log.e("Error", "Access denied");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

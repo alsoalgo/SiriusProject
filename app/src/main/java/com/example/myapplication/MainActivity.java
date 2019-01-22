@@ -27,9 +27,9 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, DataBaseReceiver {
     private static final String TAG = "MainActivity FIND";
-    IdeasDataBaseHelper dbhelper;
+    DataBaseHelper dbhelper;
     ArrayList<Model> listIdeas;
-
+    Bundle arguments;
     public interface ClickListener {
         void onClick(View view, int position);
         void onLongClick(View view, int position);
@@ -38,10 +38,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void dataReceived(List<Idea> list) {
 
-    }
+    };
     private RecyclerView recyclerView;
     private Adapter adapter;
-    GetAllIdeasTask gt;
     DataBaseReceiver r;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +55,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        arguments = getIntent().getExtras();
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        dbhelper = new IdeasDataBaseHelper(this);
+        dbhelper = new DataBaseHelper(this);
         loadData();
     }
 
